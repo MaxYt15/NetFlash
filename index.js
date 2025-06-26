@@ -14,6 +14,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Ruta camuflada para el generador de BINS
+app.get('/genbins', (req, res) => {
+  res.sendFile(path.join(__dirname, 'assets', 'genbins.html'));
+});
+
 // Endpoint para test de velocidad usando el binario oficial de Speedtest CLI
 app.get('/api/speedtest', (req, res) => {
   // Cambia la ruta si el binario está en otro lugar
