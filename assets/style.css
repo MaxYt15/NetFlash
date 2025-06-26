@@ -177,16 +177,6 @@ body::before {
   100% { background-position: 60px 40px, -40px 60px, 30px -30px; }
 }
 
-@media (max-width: 991.98px) {
-  body::before {
-    background:
-      linear-gradient(135deg, #232526 0%, #414345 100%),
-      url('data:image/svg+xml;utf8,<svg width="600" height="600" xmlns="http://www.w3.org/2000/svg"><g opacity="0.13"><circle cx="300" cy="300" r="250" stroke="white" stroke-width="2" fill="none"/><circle cx="300" cy="300" r="180" stroke="white" stroke-width="1.5" fill="none"/><circle cx="300" cy="300" r="110" stroke="white" stroke-width="1" fill="none"/><circle cx="300" cy="300" r="50" stroke="white" stroke-width="0.7" fill="none"/></g></svg>') repeat-y center top;
-    background-size: cover, 600px 600px;
-    animation: none;
-  }
-}
-
 main, .navbar, footer {
   position: relative;
   z-index: 2;
