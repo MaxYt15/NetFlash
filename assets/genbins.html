@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador de BINS | Flashing-bins</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="genbins.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { background: linear-gradient(135deg, #232526 0%, #414345 100%); font-family: 'Poppins', Arial, sans-serif; color: #e9ecef; }
+    .card { background: rgba(30,34,40,0.97); border-radius: 1.2rem; box-shadow: 0 4px 32px 0 #0002; }
+    .form-label { font-weight: 600; color: #fff; }
+    .form-control, .form-select { background: #23272b; color: #e9ecef; border: 1px solid #444; }
+    .form-control::placeholder { color: #bfc9d1; opacity: 1; }
+    .form-control:focus, .form-select:focus { border-color: #00ffae; box-shadow: 0 0 0 0.15rem #00ffae44; color: #fff; background: #23272b; }
+    .btn-gen { background: #00ffae; color: #232526; font-weight: 700; border-radius: 0.7rem; }
+    .btn-gen:hover { background: #00cfa0; }
+    .result-box { background: #23272b; color: #00ffae; border-radius: 0.7rem; min-height: 120px; font-family: 'Fira Mono', monospace; font-size: 1.1rem; padding: 1rem; margin-top: 1rem; }
+    .btn-copy { background: #007bff; color: #fff; border-radius: 0.5rem; }
+    .btn-copy:hover { background: #005fa3; }
+    h2 { color: #fff; text-shadow: 0 2px 12px #00ffae22, 0 1px 0 #222a; }
+    @media (max-width: 767.98px) { .card { border-radius: 0.7rem; } }
+    .fade-in-bin {
+      animation: fadeInBin 0.7s;
+      border-bottom: 1px solid #2226;
+      padding: 0.2rem 0.5rem;
+      font-size: 1.08rem;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    @keyframes fadeInBin {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .bin-type {
+      font-weight: 600;
+      color: #00ffae;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 1rem;
+    }
+    .bin-type.visa { color: #1a9fff; }
+    .bin-type.mastercard { color: #ff5f00; }
+    .bin-type.amex { color: #2eccb8; }
+    .bin-type.discover { color: #f7b731; }
+    .bin-type.jcb { color: #a259ff; }
+    .bin-type.diners { color: #e17055; }
+    .bin-type.unionpay { color: #00b894; }
+    .bin-type.maestro { color: #cc2131; }
+    .bin-type.elo { color: #ffcb05; }
+    .bin-type.hipercard { color: #822124; }
+    .bin-type.mir { color: #1ab248; }
+    .bin-type.troy { color: #0098a6; }
+    .bin-type.uatp { color: #6c757d; }
+    .bin-type.rupay { color: #0054a6; }
+    .bin-type.dankort { color: #d52b1e; }
+    .bin-type.verve { color: #f44336; }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card p-4 shadow">
+          <h2 class="fw-bold mb-3 text-center"><i class="fa-solid fa-credit-card me-2"></i>Generador de BINS</h2>
+          <form id="binForm" autocomplete="off">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">BIN (papelera)</label>
+                <input type="text" class="form-control" id="bin" placeholder="Ej: 453590" maxlength="16" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Formato</label>
+                <select class="form-select" id="format">
+                  <option value="TUBO">TUBO</option>
+                  <option value="CSV">CSV</option>
+                  <option value="JSON">JSON</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Cantidad</label>
+                <input type="number" class="form-control" id="cantidad" min="1" max="50" value="10" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Mes</label>
+                <select class="form-select" id="mes">
+                  <option value="">Aleatorio</option>
+                  <option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option>
+                  <option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option>
+                  <option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Año</label>
+                <select class="form-select" id="anio">
+                  <option value="">Aleatorio</option>
+                  <option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option>
+                  <option value="2027">2027</option><option value="2028">2028</option><option value="2029">2029</option>
+                  <option value="2030">2030</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">CVV</label>
+                <input type="text" class="form-control" id="cvv" placeholder="Aleatorio o deja en blanco" maxlength="4">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Divisa</label>
+                <select class="form-select" id="divisa">
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="PEN">PEN</option>
+                  <option value="BRL">BRL</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Balance</label>
+                <input type="text" class="form-control" id="balance" placeholder="Ej: 500-1000 o Aleatorio">
+              </div>
+            </div>
+            <div class="d-flex justify-content-center gap-3 mt-4">
+              <button type="submit" class="btn btn-gen px-4"><i class="fa-solid fa-bolt me-2"></i>Generar</button>
+              <button type="button" class="btn btn-secondary px-4" id="resetBtn">Reiniciar</button>
+            </div>
+          </form>
+          <div class="result-box mt-4" id="resultBox" style="display:none;"></div>
+          <div class="d-flex justify-content-end mt-2">
+            <button class="btn btn-copy" id="copyBtn" style="display:none;"><i class="fa-solid fa-copy me-1"></i>Copiar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <script src="genbins.js"></script>
+  <script>
+    // Iconos para tipos de tarjeta
+    const cardIcons = {
+      Visa: '<i class="fa-brands fa-cc-visa"></i>',
+      MasterCard: '<i class="fa-brands fa-cc-mastercard"></i>',
+      Amex: '<i class="fa-brands fa-cc-amex"></i>',
+      Discover: '<i class="fa-brands fa-cc-discover"></i>',
+      JCB: '<i class="fa-brands fa-cc-jcb"></i>',
+      Diners: '<i class="fa-brands fa-cc-diners-club"></i>',
+      UnionPay: '<i class="fa-solid fa-credit-card"></i>',
+      Maestro: '<i class="fa-solid fa-credit-card"></i>',
+      Elo: '<i class="fa-solid fa-credit-card"></i>',
+      Hipercard: '<i class="fa-solid fa-credit-card"></i>',
+      Mir: '<i class="fa-solid fa-credit-card"></i>',
+      Troy: '<i class="fa-solid fa-credit-card"></i>',
+      UATP: '<i class="fa-solid fa-credit-card"></i>',
+      Rupay: '<i class="fa-solid fa-credit-card"></i>',
+      Dankort: '<i class="fa-solid fa-credit-card"></i>',
+      Verve: '<i class="fa-solid fa-credit-card"></i>',
+      Desconocida: '<i class="fa-solid fa-credit-card"></i>'
+    };
+    window.cardIcons = cardIcons;
+  </script>
+</body>
+</html> 
