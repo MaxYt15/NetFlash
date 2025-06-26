@@ -8,6 +8,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/style.css">
   <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="bg-dark text-light">
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
@@ -69,6 +72,36 @@
   <script src="assets/netflash.js"></script>
   <script>
     AOS.init();
+    // Navbar inteligente: ocultar al bajar, mostrar al subir
+    let lastScroll = window.scrollY;
+    const navbar = document.querySelector('.navbar');
+    let ticking = false;
+    // Detectar si el menú hamburguesa está abierto
+    const dropdown = document.getElementById('menuDropdown');
+    let menuOpen = false;
+    dropdown.addEventListener('show.bs.dropdown', () => { menuOpen = true; navbar.classList.add('smart-show'); });
+    dropdown.addEventListener('hide.bs.dropdown', () => { menuOpen = false; });
+    function handleNavbar() {
+      if (menuOpen) return; // No ocultar si el menú está abierto
+      const currentScroll = window.scrollY;
+      if (currentScroll > lastScroll && currentScroll > 60) {
+        navbar.classList.remove('smart-show');
+        navbar.classList.add('smart-hide');
+      } else if (currentScroll < lastScroll) {
+        navbar.classList.remove('smart-hide');
+        navbar.classList.add('smart-show');
+      }
+      lastScroll = currentScroll;
+      ticking = false;
+    }
+    window.addEventListener('scroll', function() {
+      if (!ticking) {
+        window.requestAnimationFrame(handleNavbar);
+        ticking = true;
+      }
+    });
+    // Mostrar navbar al cargar
+    navbar.classList.add('smart-show');
   </script>
 </body>
 </html>
