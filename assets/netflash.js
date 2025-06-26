@@ -5,11 +5,21 @@ fetch('https://ipinfo.io/json')
     document.getElementById('ip').textContent = data.ip || 'Desconocido';
     document.getElementById('isp').textContent = data.org || 'Desconocido';
     document.getElementById('country').textContent = data.country || 'Desconocido';
+    document.getElementById('city').textContent = data.city || 'Desconocido';
+    document.getElementById('region').textContent = data.region || 'Desconocido';
+    document.getElementById('postal').textContent = data.postal || 'Desconocido';
+    document.getElementById('timezone').textContent = data.timezone || 'Desconocido';
+    document.getElementById('loc').textContent = data.loc || 'Desconocido';
   })
   .catch(() => {
     document.getElementById('ip').textContent = 'Desconocido';
     document.getElementById('isp').textContent = 'Desconocido';
     document.getElementById('country').textContent = 'Desconocido';
+    document.getElementById('city').textContent = 'Desconocido';
+    document.getElementById('region').textContent = 'Desconocido';
+    document.getElementById('postal').textContent = 'Desconocido';
+    document.getElementById('timezone').textContent = 'Desconocido';
+    document.getElementById('loc').textContent = 'Desconocido';
   });
 
 // Configuración del velocímetro Gauge.js
