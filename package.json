@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "express": "^5.1.0",
+    "fast-speedtest-api": "^0.3.2",
     "node-fetch": "^3.3.2"
   }
 }

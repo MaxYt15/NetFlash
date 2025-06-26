@@ -50,32 +50,25 @@ gauge.set(0);
 document.getElementById('gaugeLabel').textContent = '0 Mbps';
 document.getElementById('gaugeType').textContent = 'Descarga';
 
-// Integrar Librespeed para test real de velocidad
+// Cargar la librería de Librespeed si no está
 (function() {
   if (!window.Speedtest) {
     var script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/gh/librespeed/speedtest@master/speedtest.js';
-    script.onload = setupSpeedTest;
+    script.onload = setupLibrespeedTest;
     document.head.appendChild(script);
   } else {
-    setupSpeedTest();
+    setupLibrespeedTest();
   }
 })();
 
-function setupSpeedTest() {
+function setupLibrespeedTest() {
   var s = new Speedtest();
 
   function iniciarTest() {
-    // Deshabilita el botón mientras corre el test
     const btn = document.getElementById('startTest');
     btn.disabled = true;
     btn.textContent = 'Test en curso...';
-
-    // Evita iniciar un nuevo test si ya hay uno corriendo
-    if (s.getState() !== 0) {
-      return;
-    }
-
     document.getElementById('downloadSpeed').textContent = '...';
     document.getElementById('uploadSpeed').textContent = '...';
     document.getElementById('ping').textContent = '...';
@@ -83,41 +76,27 @@ function setupSpeedTest() {
     document.getElementById('gaugeLabel').textContent = '0 Mbps';
     document.getElementById('gaugeType').textContent = 'Descarga';
 
-    // Configurar servidor público de Librespeed
-    s.setParameter("server", {
-      name: "Librespeed Public",
-      server: "https://speedtest.serverius.net/",
-      dlURL: "garbage.php",
-      ulURL: "empty.php",
-      pingURL: "empty.php",
-      getIpURL: "getIP.php"
-    });
-
     s.onupdate = function(data) {
-      // Descarga
       if (typeof data.dlStatus !== 'undefined' && s.getState() === 1) {
-        document.getElementById('downloadSpeed').textContent = data.dlStatus + ' Mbps';
+        document.getElementById('gaugeType').textContent = 'Descarga';
         gauge.set(parseFloat(data.dlStatus) || 0);
         document.getElementById('gaugeLabel').textContent = data.dlStatus + ' Mbps';
-        document.getElementById('gaugeType').textContent = 'Descarga';
+        document.getElementById('downloadSpeed').textContent = data.dlStatus + ' Mbps';
       }
-      // Subida
       if (typeof data.ulStatus !== 'undefined' && s.getState() === 3) {
-        document.getElementById('uploadSpeed').textContent = data.ulStatus + ' Mbps';
+        document.getElementById('gaugeType').textContent = 'Subida';
         gauge.set(parseFloat(data.ulStatus) || 0);
         document.getElementById('gaugeLabel').textContent = data.ulStatus + ' Mbps';
-        document.getElementById('gaugeType').textContent = 'Subida';
+        document.getElementById('uploadSpeed').textContent = data.ulStatus + ' Mbps';
       }
-      // Ping
       if (typeof data.pingStatus !== 'undefined' && s.getState() === 4) {
-        document.getElementById('ping').textContent = data.pingStatus + ' ms';
+        document.getElementById('gaugeType').textContent = 'Ping';
         gauge.set(parseFloat(data.pingStatus) || 0);
         document.getElementById('gaugeLabel').textContent = data.pingStatus + ' ms';
-        document.getElementById('gaugeType').textContent = 'Ping';
+        document.getElementById('ping').textContent = data.pingStatus + ' ms';
       }
     };
     s.onend = function(aborted) {
-      // Habilita el botón al terminar
       btn.disabled = false;
       btn.textContent = 'Iniciar Test';
     };

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NetFlash - Test de Velocidad</title>
+  <title>Flashing-bins - Información de Red</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/style.css">
@@ -14,18 +14,26 @@
     <div class="container-fluid">
       <a class="navbar-brand d-flex align-items-center" href="#">
         <i class="fa-solid fa-bolt fa-lg me-2"></i>
-        <span class="fw-bold">NetFlash</span>
+        <span class="fw-bold">Flashing-bins</span>
       </a>
+      <div class="ms-auto">
+        <div class="dropdown">
+          <button class="btn btn-primary dropdown-toggle d-flex align-items-center" type="button" id="menuDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background: none; border: none; box-shadow: none;">
+            <span style="font-size: 2rem; line-height: 1;">
+              <i class="fa-solid fa-bars"></i>
+            </span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end bg-dark text-light" aria-labelledby="menuDropdown">
+            <li><a class="dropdown-item text-light" href="#">Herramientas</a></li>
+            <li><a class="dropdown-item text-light" href="#">GEN BINS</a></li>
+            <li><a class="dropdown-item text-light" href="#">INFO IP</a></li>
+            <li><a class="dropdown-item text-light" href="#">GEN DATOS FALSOS</a></li>
+          </ul>
+        </div>
+      </div>
     </div>
   </nav>
   <main class="container py-5">
-    <div class="text-center mb-5" data-aos="fade-down">
-      <h1 class="display-4 fw-bold">¡Mide tu velocidad de Internet!</h1>
-      <p class="lead">Descubre tu velocidad real, tu IP y tu proveedor en segundos.</p>
-      <button id="startTest" class="btn btn-success btn-lg mt-3">
-        <i class="fa-solid fa-gauge-high me-2"></i>Iniciar Test
-      </button>
-    </div>
     <div class="row justify-content-center mb-4" data-aos="fade-up">
       <div class="col-md-6">
         <div class="card bg-secondary text-light shadow">
@@ -40,54 +48,15 @@
         </div>
       </div>
     </div>
-    <div class="row justify-content-center" data-aos="zoom-in">
-      <div class="col-md-8">
-        <div class="card bg-dark text-light shadow mb-4 text-center p-4">
-          <h5 class="card-title mb-4"><i class="fa-solid fa-tachometer-alt me-2"></i>Velocidad en tiempo real</h5>
-          <canvas id="gauge" width="350" height="200"></canvas>
-          <div class="mt-4">
-            <div id="gaugeLabel" class="display-5 fw-bold">0 Mbps</div>
-            <div id="gaugeType" class="lead">Descarga</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="row justify-content-center" data-aos="zoom-in">
-      <div class="col-md-8">
-        <div class="card bg-dark text-light shadow mb-4">
-          <div class="card-body">
-            <h5 class="card-title"><i class="fa-solid fa-tachometer-alt me-2"></i>Resultados</h5>
-            <div class="row mt-4 text-center">
-              <div class="col">
-                <i class="fa-solid fa-download fa-2x text-info"></i>
-                <div><b>Descarga</b></div>
-                <div id="downloadSpeed">...</div>
-              </div>
-              <div class="col">
-                <i class="fa-solid fa-upload fa-2x text-warning"></i>
-                <div><b>Subida</b></div>
-                <div id="uploadSpeed">...</div>
-              </div>
-              <div class="col">
-                <i class="fa-solid fa-clock fa-2x text-success"></i>
-                <div><b>Ping</b></div>
-                <div id="ping">...</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </main>
   <footer class="text-center py-3 bg-primary text-light mt-5">
-    <span>NetFlash &copy; 2025 - Tecnología y velocidad a tu alcance</span>
+    <span>Flashing-bins &copy; 2025 - By Sunkovv</span>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gaugeJS@1.3.7/dist/gauge.min.js"></script>
   <script src="assets/netflash.js"></script>
   <script>
     AOS.init();
   </script>
 </body>
-</html> 
+</html>
