@@ -42,25 +42,36 @@
     </div>
     <div class="row justify-content-center" data-aos="zoom-in">
       <div class="col-md-8">
+        <div class="card bg-dark text-light shadow mb-4 text-center p-4">
+          <h5 class="card-title mb-4"><i class="fa-solid fa-tachometer-alt me-2"></i>Velocidad en tiempo real</h5>
+          <canvas id="gauge" width="350" height="200"></canvas>
+          <div class="mt-4">
+            <div id="gaugeLabel" class="display-5 fw-bold">0 Mbps</div>
+            <div id="gaugeType" class="lead">Descarga</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row justify-content-center" data-aos="zoom-in">
+      <div class="col-md-8">
         <div class="card bg-dark text-light shadow mb-4">
           <div class="card-body">
             <h5 class="card-title"><i class="fa-solid fa-tachometer-alt me-2"></i>Resultados</h5>
-            <canvas id="speedChart" height="100"></canvas>
             <div class="row mt-4 text-center">
               <div class="col">
                 <i class="fa-solid fa-download fa-2x text-info"></i>
                 <div><b>Descarga</b></div>
-                <div id="downloadSpeed">0 Mbps</div>
+                <div id="downloadSpeed">...</div>
               </div>
               <div class="col">
                 <i class="fa-solid fa-upload fa-2x text-warning"></i>
                 <div><b>Subida</b></div>
-                <div id="uploadSpeed">0 Mbps</div>
+                <div id="uploadSpeed">...</div>
               </div>
               <div class="col">
                 <i class="fa-solid fa-clock fa-2x text-success"></i>
                 <div><b>Ping</b></div>
-                <div id="ping">0 ms</div>
+                <div id="ping">...</div>
               </div>
             </div>
           </div>
@@ -69,11 +80,11 @@
     </div>
   </main>
   <footer class="text-center py-3 bg-primary text-light mt-5">
-    <span>NetFlash &copy; 2024 - Tecnología y velocidad a tu alcance</span>
+    <span>NetFlash &copy; 2025 - Tecnología y velocidad a tu alcance</span>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gaugeJS@1.3.7/dist/gauge.min.js"></script>
   <script src="assets/netflash.js"></script>
   <script>
     AOS.init();
