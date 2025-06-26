@@ -10,7 +10,15 @@ main.container {
   flex: 1 0 auto;
 }
 
+.navbar {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+  min-height: 48px;
+}
+
 .navbar-brand {
+  padding-top: 0;
+  padding-bottom: 0;
   font-size: 2rem;
   letter-spacing: 2px;
 }
@@ -68,4 +76,17 @@ footer {
     padding-left: 0.2rem;
     padding-right: 0.2rem;
   }
+  .navbar {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .container-fluid {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+}
+
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
 } 
