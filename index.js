@@ -1,6 +1,6 @@
 // Servidor principal de NetFlash con Node.js
 const express = require('express');
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(mod => mod.default(...args));
 const path = require('path');
 
 const app = express();
