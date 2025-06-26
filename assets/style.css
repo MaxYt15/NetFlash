@@ -1,0 +1,49 @@
+body {
+  background: linear-gradient(135deg, #232526 0%, #414345 100%);
+  min-height: 100vh;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.navbar-brand {
+  font-size: 2rem;
+  letter-spacing: 2px;
+}
+
+.card {
+  border-radius: 1.2rem;
+  border: none;
+}
+
+.card-title {
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+#startTest {
+  transition: transform 0.2s;
+}
+#startTest:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 20px #00ffae;
+}
+
+footer {
+  background: #007bff;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+}
+
+.list-group-item {
+  border: none;
+  font-size: 1.1rem;
+}
+
+/* Animaciones personalizadas */
+@keyframes flash {
+  0% { box-shadow: 0 0 0 0 #00ffae; }
+  70% { box-shadow: 0 0 20px 10px #00ffae33; }
+  100% { box-shadow: 0 0 0 0 #00ffae; }
+}
+
+#startTest:active {
+  animation: flash 0.5s;
+} 
