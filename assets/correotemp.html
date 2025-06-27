@@ -121,6 +121,7 @@
     let dominiosDisponibles = [];
     let correosGuardados = JSON.parse(localStorage.getItem('multiCorreos') || '[]');
     let correoIdx = 0;
+    let cooldownInterval = null;
 
     async function cargarDominios() {
       const res = await fetch('https://api.mail.tm/domains');
@@ -134,8 +135,54 @@
       localStorage.setItem('multiCorreos', JSON.stringify(correosGuardados));
     }
 
+    function cooldownActivo() {
+      const cooldownUntil = parseInt(localStorage.getItem('cooldownCrearCorreo') || '0');
+      return Date.now() < cooldownUntil;
+    }
+
+    function setCooldownCrearCorreo() {
+      const genBtn = document.getElementById('generarCorreo');
+      let aviso = document.getElementById('avisoMaxCorreos');
+      if (!aviso) {
+        aviso = document.createElement('div');
+        aviso.id = 'avisoMaxCorreos';
+        aviso.className = 'text-danger fw-bold mt-2';
+        genBtn.parentNode.appendChild(aviso);
+      }
+      if (cooldownInterval) clearInterval(cooldownInterval);
+      const cooldownUntil = parseInt(localStorage.getItem('cooldownCrearCorreo') || '0');
+      const now = Date.now();
+      if (cooldownUntil > now) {
+        genBtn.disabled = true;
+        let segundos = Math.ceil((cooldownUntil - now) / 1000);
+        aviso.textContent = `Espera ${segundos} segundos para crear otro correo...`;
+        cooldownInterval = setInterval(() => {
+          const now2 = Date.now();
+          if (cooldownUntil > now2) {
+            let s = Math.ceil((cooldownUntil - now2) / 1000);
+            aviso.textContent = `Espera ${s} segundos para crear otro correo...`;
+          } else {
+            genBtn.disabled = (correosGuardados.length >= 7);
+            aviso.textContent = (correosGuardados.length >= 7) ? 'Máximo 7 correos temporales. Elimina uno para crear otro.' : '';
+            clearInterval(cooldownInterval);
+          }
+        }, 250);
+      } else {
+        genBtn.disabled = (correosGuardados.length >= 7);
+        aviso.textContent = (correosGuardados.length >= 7) ? 'Máximo 7 correos temporales. Elimina uno para crear otro.' : '';
+      }
+    }
+
     function renderMultiCorreos() {
       const div = document.getElementById('multiCorreos');
+      const genBtn = document.getElementById('generarCorreo');
+      let aviso = document.getElementById('avisoMaxCorreos');
+      if (!aviso) {
+        aviso = document.createElement('div');
+        aviso.id = 'avisoMaxCorreos';
+        aviso.className = 'text-danger fw-bold mt-2';
+        genBtn.parentNode.appendChild(aviso);
+      }
       if (correosGuardados.length > 1) {
         div.style.display = '';
         div.innerHTML = `<div class='multi-correos-list'>` + correosGuardados.map((c, i) =>
@@ -147,6 +194,7 @@
       } else {
         div.style.display = 'none';
       }
+      setCooldownCrearCorreo();
     }
 
     window.cambiarCorreo = function(idx) {
@@ -197,7 +245,20 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ address: correo, password: password })
       });
-      const data = await res.json();
+      if (!res.ok) {
+        let msg = 'No se pudo crear el correo temporal. (Vuelve a intentarlo.)';
+        try {
+          const err = await res.json();
+          if (err && err['hydra:description']) msg = err['hydra:description'];
+        } catch {}
+        throw new Error(msg);
+      }
+      let data = {};
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error('No se pudo crear el correo temporal. Respuesta vacía de la API.');
+      }
       if (data['@id']) {
         userId = data['@id'];
         const resLogin = await fetch('https://api.mail.tm/token', {
@@ -205,7 +266,15 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ address: correo, password: password })
         });
-        const loginData = await resLogin.json();
+        if (!resLogin.ok) {
+          throw new Error('No se pudo iniciar sesión con el correo temporal.');
+        }
+        let loginData = {};
+        try {
+          loginData = await resLogin.json();
+        } catch {
+          throw new Error('No se pudo iniciar sesión. Respuesta vacía de la API.');
+        }
         token = loginData.token;
         correosGuardados.push({correo, user, password, token});
         correoIdx = correosGuardados.length-1;
@@ -329,6 +398,21 @@
     }
 
     document.getElementById('generarCorreo').addEventListener('click', async function() {
+      if (correosGuardados.length >= 7 || cooldownActivo() || this.disabled) return;
+      const genBtn = this;
+      const cooldownMs = 10000;
+      const cooldownUntil = Date.now() + cooldownMs;
+      localStorage.setItem('cooldownCrearCorreo', cooldownUntil);
+      setCooldownCrearCorreo();
+      genBtn.disabled = true;
+      let aviso = document.getElementById('avisoMaxCorreos');
+      if (!aviso) {
+        aviso = document.createElement('div');
+        aviso.id = 'avisoMaxCorreos';
+        aviso.className = 'text-danger fw-bold mt-2';
+        genBtn.parentNode.appendChild(aviso);
+      }
+      aviso.textContent = 'Espera 10 segundos para crear otro correo...';
       document.getElementById('correoGenerado').innerHTML = 'Generando correo...';
       document.getElementById('correoGenerado').style.display = 'block';
       document.getElementById('inbox').style.display = 'block';
@@ -339,7 +423,13 @@
         if (timer) clearInterval(timer);
         timer = setInterval(cargarMensajesMailTM, 7000);
       } catch (e) {
-        document.getElementById('correoGenerado').innerHTML = `<span class='text-danger'>${e.message}</span>`;
+        let msg = 'Ocurrió un error al crear el correo temporal.';
+        if (e.message && (e.message.includes('JSON') || e.message.includes('Unexpected'))) {
+          msg = 'La API de correos temporales está saturada o bloqueó la petición por exceso de velocidad. Espera unos segundos e inténtalo de nuevo.';
+        } else if (e.message) {
+          msg = e.message;
+        }
+        document.getElementById('correoGenerado').innerHTML = `<span class='text-danger'>${msg}</span>`;
         document.getElementById('listaMensajes').innerHTML = '';
       }
     });
@@ -359,6 +449,7 @@
     // Restaurar sesión al cargar la página
     window.addEventListener('DOMContentLoaded', async () => {
       await cargarDominios();
+      setCooldownCrearCorreo();
       if (correosGuardados.length > 0) {
         correoIdx = 0;
         correo = correosGuardados[0].correo;
