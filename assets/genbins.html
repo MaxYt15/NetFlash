@@ -340,7 +340,7 @@
       const pan = num.slice(6, -1);
       const checksum = num.slice(-1);
       let luhn = luhnCheck(num);
-      result.innerHTML = '<span class="text-info">Buscando información del BIN en Firebase...</span>';
+      result.innerHTML = '<span class="text-info">Buscando información...</span>';
       const binData = await buscarBin(bin);
       if (binData) {
         let campos = '';
@@ -348,7 +348,7 @@
           campos += `<div><span class='fw-bold text-capitalize'>${key}:</span> <span class='text-info'>${value || 'N/A'}</span></div>`;
         }
         result.innerHTML = `
-          <div class='text-success fw-bold mb-2'>¡BIN encontrado en Firebase!</div>
+          <div class='text-success fw-bold mb-2'>¡Tarjeta encontrada!</div>
           <div class='row g-3 align-items-center justify-content-center'>
             <div class='col-md-7'>
               <div class='bg-dark text-light rounded-3 p-3 mb-2'>
@@ -375,7 +375,7 @@
           </div>
         `;
       } else {
-        result.innerHTML = `<span class='text-danger'>No se encontró información para el BIN <b>${bin}</b> en Firebase.</span>`;
+        result.innerHTML = `<span class='text-danger'>No se encontró información para el BIN <b>${bin}</b> en la base.</span>`;
       }
     });
 
