@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Correo Temporal | Herramientas</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/assets/imagenes/logo.png">
+  <style>
+    body { background: linear-gradient(135deg, #232526 0%, #414345 100%); font-family: 'Poppins', Arial, sans-serif; color: #e9ecef; }
+    .card { background: rgba(30,34,40,0.97); border-radius: 1.2rem; box-shadow: 0 4px 32px 0 #0002; }
+    .btn-gen { background: #00ffae; color: #232526; font-weight: 700; border-radius: 0.7rem; }
+    .btn-gen:hover { background: #00cfa0; }
+    .correo-box { background: #23272b; color: #00ffae; border-radius: 0.7rem; font-size: 1.1rem; padding: 1rem; margin-top: 1rem; overflow-x: auto; max-width: 100%; }
+    .inbox-list { background: #23272b; border-radius: 0.7rem; margin-top: 1.5rem; }
+    .inbox-list .list-group-item { background: transparent; color: #e9ecef; border: none; border-bottom: 1px solid #4445; }
+    .inbox-list .list-group-item:last-child { border-bottom: none; }
+    .correo-label { font-weight: 600; color: #fff; }
+    .correo-value { color: #00ffae; font-family: 'Fira Mono', monospace; font-size: 1.08rem; }
+    .multi-correos-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-bottom: 0.5rem;
+      overflow-x: unset;
+    }
+    .multi-correos-item {
+      background: #23272b;
+      border-radius: 0.6rem;
+      border: 2px solid #00ffae44;
+      display: flex;
+      align-items: center;
+      padding: 0.2rem 0.8rem 0.2rem 0.8rem;
+      font-size: 1rem;
+      color: #00ffae;
+      font-family: 'Fira Mono', monospace;
+      box-shadow: 0 2px 8px #0002;
+      transition: border 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+    .multi-correos-item.selected {
+      border: 2px solid #00ffae;
+      background: #1a1e22;
+      color: #fff;
+    }
+    .multi-correos-item .btn-borrar-correo {
+      margin-left: 0.7rem;
+      color: #ff5f5f;
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .multi-correos-item .btn-borrar-correo:hover {
+      color: #ff0000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card p-4 shadow mb-4">
+          <h2 class="fw-bold mb-3 text-center">
+            <i class="fa-solid fa-envelope me-2"></i>Correo Temporal
+          </h2>
+          <p class="text-secondary text-center mb-3" style="font-size:1.05rem;">
+            Genera un correo temporal para recibir mensajes de prueba. Útil para registros, pruebas y evitar spam en tu correo real.
+          </p>
+          <div class="text-center mb-4">
+            <select id="dominioSelect" class="form-select d-inline-block w-auto me-2" style="max-width:200px;"></select>
+            <button id="generarCorreo" class="btn btn-gen px-4"><i class="fa-solid fa-random me-2"></i>Generar correo temporal</button>
+            <button id="borrarCorreo" class="btn btn-secondary px-4 ms-2"><i class="fa-solid fa-trash me-2"></i>Borrar sesión</button>
+          </div>
+          <div class="text-center mb-2" id="multiCorreos" style="display:none;"></div>
+          <div class="text-end mb-2" id="refreshBar" style="display:none;">
+            <button id="refreshBtn" class="btn btn-outline-info btn-sm"><i class="fa-solid fa-rotate"></i> Refrescar</button>
+            <span id="unreadCount" class="badge bg-success ms-2" style="font-size:1rem;vertical-align:middle;display:none;"></span>
+          </div>
+          <div id="correoGenerado" class="correo-box text-center" style="display:none;"></div>
+          <div id="inbox" class="inbox-list mt-4" style="display:none;">
+            <div class="fw-bold mb-2"><i class="fa-solid fa-inbox me-2"></i>Bandeja de entrada</div>
+            <ul class="list-group" id="listaMensajes">
+              <!-- Aquí se mostrarán los mensajes -->
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal para mostrar mensaje -->
+  <div class="modal fade" id="modalMensaje" tabindex="-1" aria-labelledby="modalMensajeLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalMensajeLabel">Mensaje</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body" id="modalMensajeBody">
+          <!-- Aquí va el contenido del mensaje -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let account = null;
+    let token = null;
+    let correo = '';
+    let timer = null;
+    let userId = '';
+    let user = '';
+    let password = '';
+    let dominiosDisponibles = [];
+    let correosGuardados = JSON.parse(localStorage.getItem('multiCorreos') || '[]');
+    let correoIdx = 0;
+
+    async function cargarDominios() {
+      const res = await fetch('https://api.mail.tm/domains');
+      const domData = await res.json();
+      dominiosDisponibles = domData['hydra:member'].map(d => d.domain);
+      const select = document.getElementById('dominioSelect');
+      select.innerHTML = dominiosDisponibles.map(d => `<option value="${d}">${d}</option>`).join('');
+    }
+
+    function guardarMultiCorreos() {
+      localStorage.setItem('multiCorreos', JSON.stringify(correosGuardados));
+    }
+
+    function renderMultiCorreos() {
+      const div = document.getElementById('multiCorreos');
+      if (correosGuardados.length > 1) {
+        div.style.display = '';
+        div.innerHTML = `<div class='multi-correos-list'>` + correosGuardados.map((c, i) =>
+          `<div class='multi-correos-item${i===correoIdx?' selected':''}'>
+            <span style='cursor:pointer;' onclick='cambiarCorreo(${i})'>${c.correo}</span>
+            <button class='btn-borrar-correo' title='Borrar este correo' onclick='borrarCorreoIndividual(${i})'><i class='fa-solid fa-trash'></i></button>
+          </div>`
+        ).join('') + `</div>`;
+      } else {
+        div.style.display = 'none';
+      }
+    }
+
+    window.cambiarCorreo = function(idx) {
+      correoIdx = idx;
+      correo = correosGuardados[correoIdx].correo;
+      user = correosGuardados[correoIdx].user;
+      password = correosGuardados[correoIdx].password;
+      token = correosGuardados[correoIdx].token;
+      mostrarCorreoConCopia();
+      document.getElementById('correoGenerado').style.display = 'block';
+      document.getElementById('inbox').style.display = 'block';
+      renderMultiCorreos();
+      cargarMensajesMailTM();
+      if (timer) clearInterval(timer);
+      timer = setInterval(cargarMensajesMailTM, 7000);
+    }
+
+    window.borrarCorreoIndividual = function(idx) {
+      correosGuardados.splice(idx, 1);
+      guardarMultiCorreos();
+      if (correosGuardados.length === 0) {
+        localStorage.removeItem('correoTemp');
+        localStorage.removeItem('correoTempUser');
+        localStorage.removeItem('correoTempPass');
+        localStorage.removeItem('correoTempToken');
+        location.reload();
+        return;
+      }
+      if (correoIdx >= correosGuardados.length) correoIdx = correosGuardados.length-1;
+      correo = correosGuardados[correoIdx].correo;
+      user = correosGuardados[correoIdx].user;
+      password = correosGuardados[correoIdx].password;
+      token = correosGuardados[correoIdx].token;
+      mostrarCorreoConCopia();
+      renderMultiCorreos();
+      cargarMensajesMailTM();
+      if (timer) clearInterval(timer);
+      timer = setInterval(cargarMensajesMailTM, 7000);
+    }
+
+    async function crearCuentaMailTM() {
+      const dominio = document.getElementById('dominioSelect').value;
+      user = Math.random().toString(36).substring(2, 10);
+      password = user;
+      correo = `${user}@${dominio}`;
+      const res = await fetch('https://api.mail.tm/accounts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: correo, password: password })
+      });
+      const data = await res.json();
+      if (data['@id']) {
+        userId = data['@id'];
+        const resLogin = await fetch('https://api.mail.tm/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address: correo, password: password })
+        });
+        const loginData = await resLogin.json();
+        token = loginData.token;
+        correosGuardados.push({correo, user, password, token});
+        correoIdx = correosGuardados.length-1;
+        guardarMultiCorreos();
+        renderMultiCorreos();
+        localStorage.setItem('correoTemp', correo);
+        localStorage.setItem('correoTempUser', user);
+        localStorage.setItem('correoTempPass', password);
+        localStorage.setItem('correoTempToken', token);
+        return correo;
+      } else {
+        throw new Error('No se pudo crear el correo temporal.');
+      }
+    }
+
+    async function cargarMensajesMailTM() {
+      if (!token) return;
+      document.getElementById('refreshBar').style.display = '';
+      const res = await fetch('https://api.mail.tm/messages', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      let html = '';
+      let unread = 0;
+      if (!data['hydra:member'] || data['hydra:member'].length === 0) {
+        html = `<li class='list-group-item text-center text-secondary'>No hay mensajes aún.</li>`;
+      } else {
+        for (const msg of data['hydra:member']) {
+          const isUnread = !msg.seen;
+          if (isUnread) unread++;
+          html += `<li class='list-group-item d-flex justify-content-between align-items-start ${isUnread ? 'fw-bold bg-dark' : ''}' style='border-left:4px solid ${isUnread ? '#00ffae':'#4445'};'>
+            <div style='flex:1 1 0;min-width:0;'>
+              <span>${msg.from && msg.from.address ? `<span class='me-1'>${msg.from.address}</span> <button class='btn btn-xs btn-outline-info btn-copy' title='Copiar remitente' onclick='copiarCampo("${msg.from.address}")'><i class="fa-solid fa-copy"></i></button>` : 'Desconocido'}</span><br>
+              <span style='color:#00ffae;'>${msg.subject || '(Sin asunto)'}</span> <button class='btn btn-xs btn-outline-info btn-copy' title='Copiar asunto' onclick='copiarCampo("${(msg.subject||'').replace(/"/g,'&quot;')}")'><i class="fa-solid fa-copy"></i></button><br>
+              <small class='text-secondary'>${new Date(msg.introDate||msg.createdAt).toLocaleString()}</small>
+            </div>
+            <div class='d-flex flex-column align-items-end ms-2'>
+              <button class='btn btn-sm btn-outline-info mb-1' onclick='verMensajeMailTM("${msg.id}")'><i class='fa-solid fa-envelope-open-text'></i></button>
+              <button class='btn btn-sm btn-outline-danger' onclick='eliminarMensajeMailTM("${msg.id}")'><i class='fa-solid fa-trash'></i></button>
+            </div>
+          </li>`;
+        }
+      }
+      document.getElementById('listaMensajes').innerHTML = html;
+      const badge = document.getElementById('unreadCount');
+      if (unread > 0) {
+        badge.textContent = unread;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    window.copiarCampo = function(valor) {
+      navigator.clipboard.writeText(valor);
+    }
+
+    window.eliminarMensajeMailTM = async function(id) {
+      if (!token) return;
+      await fetch(`https://api.mail.tm/messages/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      cargarMensajesMailTM();
+    }
+
+    function enlazarTexto(texto) {
+      return texto.replace(
+        /(https?:\/\/[^\s]+)/g,
+        '<a href="$1" target="_blank" style="color:#00ffae;word-break:break-all;">$1</a>'
+      );
+    }
+
+    async function verMensajeMailTM(id) {
+      if (!token) return;
+      const res = await fetch(`https://api.mail.tm/messages/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const msg = await res.json();
+      // Mostrar en modal bonito
+      let html = `<div><b>De:</b> ${msg.from && msg.from.address ? msg.from.address : 'Desconocido'}</div>`;
+      html += `<div><b>Asunto:</b> ${msg.subject || '(Sin asunto)'}</div>`;
+      const cuerpo = msg.text || msg.html || '(Sin contenido)';
+      html += `<hr><div style='white-space:pre-wrap;word-break:break-word;max-width:100%;overflow-wrap:break-word;'>${enlazarTexto(cuerpo)}</div>`;
+      document.getElementById('modalMensajeBody').innerHTML = html;
+      var modal = new bootstrap.Modal(document.getElementById('modalMensaje'));
+      modal.show();
+    }
+
+    window.verMensajeMailTM = verMensajeMailTM;
+
+    function mostrarCorreoConCopia() {
+      document.getElementById('correoGenerado').innerHTML = `<span class='correo-label'>Correo temporal:</span> <span class='correo-value' id='correoTempTexto'>${correo}</span> <button id='btnCopiarCorreo' class='btn btn-sm btn-outline-info ms-2' title='Copiar'><i class='fa-solid fa-copy'></i></button> <span id='copiadoMsg' style='display:none;color:#00ffae;font-weight:600;'>¡Copiado!</span>`;
+      document.getElementById('btnCopiarCorreo').onclick = function() {
+        navigator.clipboard.writeText(correo);
+        const msg = document.getElementById('copiadoMsg');
+        msg.style.display = 'inline';
+        setTimeout(() => { msg.style.display = 'none'; }, 1200);
+      };
+    }
+
+    async function restaurarSesionCorreoTemp() {
+      const correoGuardado = localStorage.getItem('correoTemp');
+      const userGuardado = localStorage.getItem('correoTempUser');
+      const passGuardado = localStorage.getItem('correoTempPass');
+      const tokenGuardado = localStorage.getItem('correoTempToken');
+      if (correoGuardado && userGuardado && passGuardado && tokenGuardado) {
+        correo = correoGuardado;
+        user = userGuardado;
+        password = passGuardado;
+        token = tokenGuardado;
+        mostrarCorreoConCopia();
+        document.getElementById('correoGenerado').style.display = 'block';
+        document.getElementById('inbox').style.display = 'block';
+        cargarMensajesMailTM();
+        if (timer) clearInterval(timer);
+        timer = setInterval(cargarMensajesMailTM, 7000);
+        return true;
+      }
+      return false;
+    }
+
+    document.getElementById('generarCorreo').addEventListener('click', async function() {
+      document.getElementById('correoGenerado').innerHTML = 'Generando correo...';
+      document.getElementById('correoGenerado').style.display = 'block';
+      document.getElementById('inbox').style.display = 'block';
+      try {
+        await crearCuentaMailTM();
+        mostrarCorreoConCopia();
+        cargarMensajesMailTM();
+        if (timer) clearInterval(timer);
+        timer = setInterval(cargarMensajesMailTM, 7000);
+      } catch (e) {
+        document.getElementById('correoGenerado').innerHTML = `<span class='text-danger'>${e.message}</span>`;
+        document.getElementById('listaMensajes').innerHTML = '';
+      }
+    });
+
+    document.getElementById('borrarCorreo').addEventListener('click', function() {
+      localStorage.removeItem('correoTemp');
+      localStorage.removeItem('correoTempUser');
+      localStorage.removeItem('correoTempPass');
+      localStorage.removeItem('correoTempToken');
+      correosGuardados = [];
+      guardarMultiCorreos();
+      location.reload();
+    });
+
+    document.getElementById('refreshBtn').addEventListener('click', cargarMensajesMailTM);
+
+    // Restaurar sesión al cargar la página
+    window.addEventListener('DOMContentLoaded', async () => {
+      await cargarDominios();
+      if (correosGuardados.length > 0) {
+        correoIdx = 0;
+        correo = correosGuardados[0].correo;
+        user = correosGuardados[0].user;
+        password = correosGuardados[0].password;
+        token = correosGuardados[0].token;
+        mostrarCorreoConCopia();
+        document.getElementById('correoGenerado').style.display = 'block';
+        document.getElementById('inbox').style.display = 'block';
+        renderMultiCorreos();
+        cargarMensajesMailTM();
+        if (timer) clearInterval(timer);
+        timer = setInterval(cargarMensajesMailTM, 7000);
+      }
+    });
+  </script>
+</body>
+</html> 

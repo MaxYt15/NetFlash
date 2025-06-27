@@ -2,6 +2,7 @@
 const express = require('express');
 const path = require('path');
 const { execFile, spawn } = require('child_process');
+const fetch = require('node-fetch'); // npm install node-fetch
 
 const app = express();
 const PORT = 3000;
@@ -17,6 +18,11 @@ app.get('/', (req, res) => {
 // Ruta camuflada para el generador de BINS
 app.get('/genbins', (req, res) => {
   res.sendFile(path.join(__dirname, 'assets', 'genbins.html'));
+});
+
+// Ruta camuflada para correos temporales
+app.get('/correotemp', (req, res) => {
+  res.sendFile(path.join(__dirname, 'assets', 'correotemp.html'));
 });
 
 // Endpoint para test de velocidad usando el binario oficial de Speedtest CLI
@@ -95,6 +101,28 @@ app.get('/api/speedtest-stream', (req, res) => {
   req.on('close', () => {
     st.kill();
   });
+});
+
+// Proxy para la API de 1secmail (evita CORS)
+app.get('/api/1secmail', async (req, res) => {
+  const { login, domain, action, id } = req.query;
+  if (!login || !domain || !action) {
+    return res.status(400).json({ error: 'Faltan parámetros requeridos' });
+  }
+  let url = `https://www.1secmail.com/api/v1/?action=${action}&login=${login}&domain=${domain}`;
+  if (action === 'readMessage' && id) url += `&id=${id}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.error('Error de 1secmail:', response.status, await response.text());
+      return res.status(response.status).json({ error: 'Error de 1secmail' });
+    }
+    const data = await response.json();
+    res.json(data);
+  } catch (e) {
+    console.error('Error al consultar 1secmail:', e);
+    res.status(500).json({ error: 'Error al consultar 1secmail' });
+  }
 });
 
 // Iniciar servidor
