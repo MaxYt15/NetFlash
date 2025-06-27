@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/assets/imagenes/logo.png">
   <style>
     body { background: linear-gradient(135deg, #232526 0%, #414345 100%); font-family: 'Poppins', Arial, sans-serif; color: #e9ecef; }
     .card { background: rgba(30,34,40,0.97); border-radius: 1.2rem; box-shadow: 0 4px 32px 0 #0002; }
@@ -72,7 +73,10 @@
     <div class="row justify-content-center">
       <div class="col-lg-8">
         <div class="card p-4 shadow">
-          <h2 class="fw-bold mb-3 text-center"><i class="fa-solid fa-credit-card me-2"></i>Generador de BINS</h2>
+          <h2 class="fw-bold mb-3 text-center">
+            <img src="/assets/imagenes/logo.png" alt="Logo" style="height:2.1rem;width:auto;object-fit:contain;margin-right:0.5rem;vertical-align:middle;">
+            Generador de BINS
+          </h2>
           <form id="binForm" autocomplete="off">
             <div class="row g-3">
               <div class="col-md-6">
@@ -82,7 +86,7 @@
               <div class="col-md-6">
                 <label class="form-label">Formato</label>
                 <select class="form-select" id="format">
-                  <option value="TUBO">TUBO</option>
+                  <option value="PIPE">PIPE</option>
                   <option value="CSV">CSV</option>
                   <option value="JSON">JSON</option>
                 </select>

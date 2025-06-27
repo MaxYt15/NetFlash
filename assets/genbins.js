@@ -53,7 +53,7 @@ function generateBINs(opts) {
     let divisa = opts.divisa;
     let balance = opts.balance || randomBalance();
     let tipo = getCardType(opts.bin);
-    if(opts.format==='TUBO'){
+    if(opts.format==='PIPE'){
       bins.push(`${card}|${mes}|${anio}|${cvv}|${divisa}|${balance}|${tipo}`);
     } else if(opts.format==='CSV'){
       bins.push(`${card},${mes},${anio},${cvv},${divisa},${balance},${tipo}`);
