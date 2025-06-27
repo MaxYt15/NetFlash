@@ -359,16 +359,18 @@
               </div>
             </div>
             <div class='col-md-5 d-flex justify-content-center'>
-              <div class='rounded-4 p-3' style='background:linear-gradient(120deg,#f8fafc 60%,#232526 100%);min-width:260px;max-width:320px;'>
-                <div class='d-flex align-items-center mb-2'>
-                  <img src='${binData.logo || 'https://logo.clearbit.com/visa.com'}' alt='logo' style='height:32px;width:auto;margin-right:10px;border-radius:6px;background:#fff;'>
-                  <span class='fw-bold' style='font-size:1.2rem;'>${binData.brand ? binData.brand.toUpperCase() : ''}</span>
+              <div class='modern-card-visual rounded-4 p-4' style='background: linear-gradient(135deg, #f8fafc 60%, #e0e7ef 100%); box-shadow: 0 8px 32px 0 #0005; min-width:260px; max-width:320px; position:relative; border: 1.5px solid #e0e7ef;'>
+                <div style='width:100%;display:flex;justify-content:center;align-items:center;margin-bottom:10px;margin-top:2px;'>
+                  <span class='card-logo' style='font-size:1.7rem; color: ${binData.brand && binData.brand.toLowerCase()==='visa' ? '#1a9fff' : binData.brand && binData.brand.toLowerCase()==='mastercard' ? '#ff5f00' : '#232526'};'>
+                    ${window.cardIcons && binData.brand && window.cardIcons[binData.brand] ? window.cardIcons[binData.brand] : '<i class="fa-solid fa-credit-card"></i>'}
+                  </span>
                 </div>
-                <div class='mb-2' style='font-size:1.1rem;letter-spacing:2px;'>${num.replace(/(\d{4})(?=\d)/g, '$1 ')}</div>
-                <div style='font-size:0.95rem;'>
-                  <span class='text-secondary'>BIN: ${bin}</span><br>
-                  <span class='text-secondary'>PAÍS: ${binData.countryCode || ''} ${binData.emoji || ''}</span><br>
-                  <span class='text-secondary'>BANCO: ${binData.issuer || binData.bank || 'N/A'}</span>
+                <div class='fw-bold mb-2' style='font-size:1.3rem;letter-spacing:2.5px;color:#232526;text-shadow:0 2px 8px #fff8; margin-top:12px;'>${num.replace(/(\d{4})(?=\d)/g, '$1 ')}</div>
+                <div class='mb-2' style='font-size:1.05rem;color:#444;font-weight:600;'>${binData.brand ? binData.brand.toUpperCase() : ''}</div>
+                <div style='font-size:1rem;color:#232526;'>
+                  <span style='color:#555;'>BIN:</span> ${bin}<br>
+                  <span style='color:#555;'>PAÍS:</span> ${binData.countryCode || ''} ${binData.emoji || ''}<br>
+                  <span style='color:#555;'>BANCO:</span> ${binData.issuer || binData.bank || 'N/A'}
                 </div>
               </div>
             </div>

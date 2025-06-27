@@ -165,9 +165,8 @@ document.getElementById('copyBtn').addEventListener('click', function(){
   navigator.clipboard.writeText(text);
 });
 
-// Checker CC con coincidencia de BIN más largo (prefijo)
-const binsDBPromise = fetch('assets/bins.json').then(r => r.json());
-document.getElementById('cc-checker-form').addEventListener('submit', async function(e) {
+// Checker CC sin bins.json
+document.getElementById('cc-checker-form').addEventListener('submit', function(e) {
   e.preventDefault();
   const num = document.getElementById('cc-checker-input').value.replace(/\s+/g, '');
   const result = document.getElementById('cc-checker-result');
@@ -183,67 +182,12 @@ document.getElementById('cc-checker-form').addEventListener('submit', async func
     let sum = arr.reduce((acc, val, idx) => acc + (idx % 2 ? ((val *= 2) > 9 ? val - 9 : val) : val), 0);
     return sum % 10 === 0;
   }
-  // MII
-  const miiList = {
-    '1': 'Airlines',
-    '2': 'Airlines, Financial',
-    '3': 'Travel, Entertainment, Banking',
-    '4': 'Banking And Financial',
-    '5': 'Banking And Financial',
-    '6': 'Merchandising, Banking',
-    '7': 'Petroleum',
-    '8': 'Telecommunications',
-    '9': 'National Assignment'
-  };
-  const mii = miiList[num[0]] || 'Desconocido';
-  result.innerHTML = '<span class="text-info">Buscando BIN local...</span>';
-  const bins = await binsDBPromise;
-  // Buscar todos los BINs que sean prefijo del número ingresado
-  let posibles = bins.filter(b => num.startsWith(String(b.bin)));
-  // Elegir el BIN más largo que coincida
-  let data = posibles.sort((a, b) => String(b.bin).length - String(a.bin).length)[0];
   const isValid = luhnCheck(num);
-  // Emoji de país por código (solo los más comunes, se puede ampliar)
-  function getFlagEmoji(cc) {
-    if (!cc) return '';
-    return cc.replace(/./g, c => String.fromCodePoint(127397 + c.toUpperCase().charCodeAt(0)));
-  }
-  if (!data) {
-    // Mostrar el bin de 6 dígitos para el mensaje
-    const bin6 = num.slice(0,6);
-    result.innerHTML = `<span class='text-danger'>No se encontró información real para el BIN <b>${bin6}</b>.</span>`;
-    return;
-  }
   result.innerHTML = `
-    <div class='row g-3 align-items-center justify-content-center'>
-      <div class='col-md-7'>
-        <div class='bg-dark text-light rounded-3 p-3 mb-2'>
-          <div class='mb-2'><span class='fw-bold'>Luhn Algorithm Check:</span> <span class='${isValid ? 'text-success' : 'text-danger'} fw-bold'>${isValid ? 'Válida <i class=\'fa-solid fa-circle-check\'></i>' : 'Inválida <i class=\'fa-solid fa-circle-xmark\'></i>'}</span></div>
-          <div><span class='fw-bold'>MII (Identificador de Industria):</span> <span class='text-info'>${mii}</span></div>
-          <div><span class='fw-bold'>Banco:</span> <span class='text-warning'>${data.issuer || 'Desconocido'}</span></div>
-          <div><span class='fw-bold'>País:</span> <span class='text-primary'>${data.country || 'Desconocido'} ${getFlagEmoji(data.countryCode)}</span></div>
-          <div><span class='fw-bold'>BIN/IIN:</span> <span class='text-info'>${data.bin}</span></div>
-          <div><span class='fw-bold'>PAN:</span> <span class='text-light'>${pan}</span></div>
-          <div><span class='fw-bold'>Red:</span> <span class='text-success'>${data.brand || 'Desconocido'}</span></div>
-          <div><span class='fw-bold'>Tipo:</span> <span class='text-info'>${data.type || 'Desconocido'}</span></div>
-          <div><span class='fw-bold'>Categoría:</span> <span class='text-info'>${data.category || 'Desconocido'}</span></div>
-          <div><span class='fw-bold'>Checksum:</span> <span class='text-danger'>${checksum}</span></div>
-        </div>
-      </div>
-      <div class='col-md-5 d-flex justify-content-center'>
-        <div class='rounded-4 p-3' style='background:linear-gradient(120deg,#f8fafc 60%,#232526 100%);min-width:260px;max-width:320px;'>
-          <div class='d-flex align-items-center mb-2'>
-            <span class='fw-bold' style='font-size:1.2rem;'>${data.brand || ''}</span>
-          </div>
-          <div class='mb-2' style='font-size:1.1rem;letter-spacing:2px;'>${num.replace(/(\d{4})(?=\d)/g, '$1 ')}</div>
-          <div style='font-size:0.95rem;'>
-            <span class='text-secondary'>MII: ${num[0]}</span><br>
-            <span class='text-secondary'>IIN/BIN: ${data.bin}</span><br>
-            <span class='text-secondary'>PAN: ${pan}</span><br>
-            <span class='text-secondary'>CHECKSUM: ${checksum}</span>
-          </div>
-        </div>
-      </div>
+    <div class='bg-dark text-light rounded-3 p-3 mb-2'>
+      <div class='mb-2'><span class='fw-bold'>Luhn Algorithm Check:</span> <span class='${isValid ? 'text-success' : 'text-danger'} fw-bold'>${isValid ? 'Válida <i class="fa-solid fa-circle-check"></i>' : 'Inválida <i class="fa-solid fa-circle-xmark"></i>'}</span></div>
+      <div><span class='fw-bold'>PAN:</span> <span class='text-light'>${pan}</span></div>
+      <div><span class='fw-bold'>Checksum:</span> <span class='text-danger'>${checksum}</span></div>
     </div>
   `;
 }); 
