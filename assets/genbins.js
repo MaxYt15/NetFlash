@@ -42,10 +42,32 @@ function getCardType(bin) {
   if (/^5061|^6500|^6504|^6505/.test(bin)) return 'Verve';
   return 'Desconocida';
 }
+function getCardLength(bin) {
+  if (/^3[47]/.test(bin)) return 15; // Amex
+  if (/^5061|^6500|^6504|^6505/.test(bin)) return 19; // Verve
+  if (/^62/.test(bin)) return 16; // UnionPay
+  if (/^4/.test(bin)) return 16; // Visa
+  if (/^5[1-5]/.test(bin)) return 16; // MasterCard
+  if (/^6(?:011|5)/.test(bin)) return 16; // Discover
+  if (/^35/.test(bin)) return 16; // JCB
+  if (/^30[0-5]|^36|^38/.test(bin)) return 14; // Diners
+  if (/^220[0-4]/.test(bin)) return 16; // Mir
+  if (/^4011|^4312|^4389|^4514|^4576|^5041|^5066|^5067|^5090|^6277|^6362|^6363/.test(bin)) return 16; // Elo
+  if (/^606282|^3841/.test(bin)) return 16; // Hipercard
+  if (/^50|^56|^57|^58|^6(?:022|4[4-9]|5)/.test(bin)) return 16; // Maestro
+  if (/^1/.test(bin)) return 15; // UATP
+  if (/^60/.test(bin)) return 16; // Rupay
+  if (/^5019/.test(bin)) return 16; // Dankort
+  return 16;
+}
 function generateBINs(opts) {
   let bins = [];
   for(let i=0;i<opts.cantidad;i++){
-    let base = opts.bin.padEnd(15, '0').slice(0,15);
+    let len = getCardLength(opts.bin);
+    let base = opts.bin;
+    while(base.length < len-1) {
+      base += randomInt(0,9);
+    }
     let card = base + luhnCheck(base);
     let mes = opts.mes || randomMonth();
     let anio = opts.anio || randomYear();

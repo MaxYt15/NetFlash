@@ -70,6 +70,93 @@
 </head>
 <body>
   <div class="container py-4">
+    <div class="row justify-content-center mb-4">
+      <div class="col-lg-10">
+        <div class="card bg-dark text-light shadow-sm p-4 mb-4">
+          <div class="fw-bold mb-3 text-center" style="font-size:1.3rem;"><i class="fa-solid fa-credit-card me-2"></i>Tipos de tarjeta detectados por el generador</div>
+          <p class="text-secondary text-center mb-4" style="font-size:1.05rem;">El generador reconoce los siguientes tipos de tarjeta según los dígitos iniciales (BIN/prefijo). Cada tipo tiene características y usos distintos. Ingresa un BIN válido para obtener tarjetas realistas para pruebas y desarrollo.</p>
+          <div class="table-responsive">
+            <table id="tabla-tarjetas" class="table table-dark table-bordered align-middle mb-0" style="--bs-table-bg:transparent; table-layout:fixed;">
+              <thead>
+                <tr class="text-center align-middle">
+                  <th style="width: 180px;">Icono</th>
+                  <th style="width: auto;">Dígito</th>
+                </tr>
+              </thead>
+              <tbody style="font-size:1.01rem;">
+                <tr>
+                  <td class="bin-type visa text-center"><i class="fa-brands fa-cc-visa fa-lg"></i> Visa</td>
+                  <td>4</td>
+                </tr>
+                <tr>
+                  <td class="bin-type mastercard text-center"><i class="fa-brands fa-cc-mastercard fa-lg"></i> MasterCard</td>
+                  <td>51-55</td>
+                </tr>
+                <tr>
+                  <td class="bin-type amex text-center"><i class="fa-brands fa-cc-amex fa-lg"></i> Amex</td>
+                  <td>34, 37</td>
+                </tr>
+                <tr>
+                  <td class="bin-type discover text-center"><i class="fa-brands fa-cc-discover fa-lg"></i> Discover</td>
+                  <td>6011, 65</td>
+                </tr>
+                <tr>
+                  <td class="bin-type jcb text-center"><i class="fa-brands fa-cc-jcb fa-lg"></i> JCB</td>
+                  <td>35</td>
+                </tr>
+                <tr>
+                  <td class="bin-type diners text-center"><i class="fa-brands fa-cc-diners-club fa-lg"></i> Diners</td>
+                  <td>300-305, 36, 38</td>
+                </tr>
+                <tr>
+                  <td class="bin-type unionpay text-center"><i class="fa-solid fa-credit-card fa-lg"></i> UnionPay</td>
+                  <td>62</td>
+                </tr>
+                <tr>
+                  <td class="bin-type maestro text-center"><i class="fa-solid fa-credit-card fa-lg"></i> Maestro</td>
+                  <td>50, 56-58, 6022, 6044-6049, 605, 6759</td>
+                </tr>
+                <tr>
+                  <td class="bin-type elo text-center"><i class="fa-solid fa-credit-card fa-lg"></i> Elo</td>
+                  <td>4011, 4312, 4389, 4514, 4576, 5041, 5066, 5067, 5090, 6277, 6362, 6363</td>
+                </tr>
+                <tr>
+                  <td class="bin-type hipercard text-center"><i class="fa-solid fa-credit-card fa-lg"></i> Hipercard</td>
+                  <td>606282, 3841</td>
+                </tr>
+                <tr>
+                  <td class="bin-type mir text-center"><i class="fa-solid fa-credit-card fa-lg"></i> Mir</td>
+                  <td>2200-2204</td>
+                </tr>
+                <tr>
+                  <td class="bin-type troy text-center"><i class="fa-solid fa-credit-card fa-lg"></i> Troy</td>
+                  <td>9792</td>
+                </tr>
+                <tr>
+                  <td class="bin-type uatp text-center"><i class="fa-solid fa-credit-card fa-lg"></i> UATP</td>
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td class="bin-type rupay text-center"><i class="fa-solid fa-credit-card fa-lg"></i> Rupay</td>
+                  <td>60</td>
+                </tr>
+                <tr>
+                  <td class="bin-type dankort text-center"><i class="fa-solid fa-credit-card fa-lg"></i> Dankort</td>
+                  <td>5019</td>
+                </tr>
+                <tr>
+                  <td class="bin-type verve text-center"><i class="fa-solid fa-credit-card fa-lg"></i> Verve</td>
+                  <td>5061, 6500, 6504, 6505</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="text-center mt-3">
+              <button id="ver-mas-btn" class="btn btn-gen" type="button">Ver más</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="row justify-content-center">
       <div class="col-lg-8">
         <div class="card p-4 shadow">
@@ -206,6 +293,26 @@
       Desconocida: '<i class="fa-solid fa-credit-card"></i>'
     };
     window.cardIcons = cardIcons;
+
+    // Mostrar solo las primeras 5 filas por defecto
+    const filas = document.querySelectorAll('#tabla-tarjetas tbody tr');
+    const btnVerMas = document.getElementById('ver-mas-btn');
+    let expandido = false;
+    function actualizarTabla() {
+      filas.forEach((fila, i) => {
+        if (!expandido && i >= 5) {
+          fila.style.display = 'none';
+        } else {
+          fila.style.display = '';
+        }
+      });
+      btnVerMas.textContent = expandido ? 'Ver menos' : 'Ver más';
+    }
+    btnVerMas.addEventListener('click', () => {
+      expandido = !expandido;
+      actualizarTabla();
+    });
+    actualizarTabla();
   </script>
 </body>
 </html> 
