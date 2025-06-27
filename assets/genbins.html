@@ -293,7 +293,99 @@
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <script src="/assets/genbins.js"></script>
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, get, child, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuk-s07skp1eVbuA8uK_rZ5z_PkwxyTRg",
+      authDomain: "network-bins.firebaseapp.com",
+      projectId: "network-bins",
+      storageBucket: "network-bins.firebasestorage.app",
+      messagingSenderId: "486570752467",
+      appId: "1:486570752467:web:5a1248eb95f55beb1cd726",
+      measurementId: "G-L37X38RB86",
+      databaseURL: "https://network-bins-default-rtdb.firebaseio.com/"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Función para buscar un BIN por su valor (campo "bin")
+    async function buscarBin(bin) {
+      const dbRef = ref(db, '/');
+      const q = query(dbRef, orderByChild('bin'), equalTo(bin));
+      const snapshot = await get(q);
+      if (snapshot.exists()) {
+        let resultado = null;
+        snapshot.forEach(childSnap => {
+          resultado = childSnap.val();
+        });
+        return resultado;
+      } else {
+        return null;
+      }
+    }
+
+    // Integrar con el Checker CC (solo aquí)
+    document.getElementById('cc-checker-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const num = document.getElementById('cc-checker-input').value.replace(/\s+/g, '');
+      const result = document.getElementById('cc-checker-result');
+      if (!num.match(/^\d{12,20}$/)) {
+        result.innerHTML = '<span class="text-danger">Por favor ingresa un número válido (12-20 dígitos).</span>';
+        return;
+      }
+      const bin = num.slice(0,6);
+      const pan = num.slice(6, -1);
+      const checksum = num.slice(-1);
+      let luhn = luhnCheck(num);
+      result.innerHTML = '<span class="text-info">Buscando información del BIN en Firebase...</span>';
+      const binData = await buscarBin(bin);
+      if (binData) {
+        let campos = '';
+        for (const [key, value] of Object.entries(binData)) {
+          campos += `<div><span class='fw-bold text-capitalize'>${key}:</span> <span class='text-info'>${value || 'N/A'}</span></div>`;
+        }
+        result.innerHTML = `
+          <div class='text-success fw-bold mb-2'>¡BIN encontrado en Firebase!</div>
+          <div class='row g-3 align-items-center justify-content-center'>
+            <div class='col-md-7'>
+              <div class='bg-dark text-light rounded-3 p-3 mb-2'>
+                ${campos}
+                <div class='mb-2'><span class='fw-bold'>Luhn Algorithm Check:</span> <span class='${luhn ? 'text-success' : 'text-danger'} fw-bold'>${luhn ? 'Válido <i class="fa-solid fa-circle-check"></i>' : 'Inválido <i class="fa-solid fa-circle-xmark"></i>'}</span></div>
+                <div><span class='fw-bold'>PAN (Primary Account Number):</span> <span class='text-light'>${pan || 'N/A'}</span></div>
+                <div><span class='fw-bold'>Checksum:</span> <span class='text-danger'>${checksum || 'N/A'}</span></div>
+              </div>
+            </div>
+            <div class='col-md-5 d-flex justify-content-center'>
+              <div class='rounded-4 p-3' style='background:linear-gradient(120deg,#f8fafc 60%,#232526 100%);min-width:260px;max-width:320px;'>
+                <div class='d-flex align-items-center mb-2'>
+                  <img src='${binData.logo || 'https://logo.clearbit.com/visa.com'}' alt='logo' style='height:32px;width:auto;margin-right:10px;border-radius:6px;background:#fff;'>
+                  <span class='fw-bold' style='font-size:1.2rem;'>${binData.brand ? binData.brand.toUpperCase() : ''}</span>
+                </div>
+                <div class='mb-2' style='font-size:1.1rem;letter-spacing:2px;'>${num.replace(/(\d{4})(?=\d)/g, '$1 ')}</div>
+                <div style='font-size:0.95rem;'>
+                  <span class='text-secondary'>BIN: ${bin}</span><br>
+                  <span class='text-secondary'>PAÍS: ${binData.countryCode || ''} ${binData.emoji || ''}</span><br>
+                  <span class='text-secondary'>BANCO: ${binData.issuer || binData.bank || 'N/A'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        result.innerHTML = `<span class='text-danger'>No se encontró información para el BIN <b>${bin}</b> en Firebase.</span>`;
+      }
+    });
+
+    // Algoritmo de Luhn (debe estar definido en el scope)
+    function luhnCheck(n) {
+      let arr = (n + '').split('').reverse().map(x => parseInt(x));
+      let sum = arr.reduce((acc, val, idx) => acc + (idx % 2 ? ((val *= 2) > 9 ? val - 9 : val) : val), 0);
+      return sum % 10 === 0;
+    }
+
     // Iconos para tipos de tarjeta
     const cardIcons = {
       Visa: '<i class="fa-brands fa-cc-visa"></i>',
