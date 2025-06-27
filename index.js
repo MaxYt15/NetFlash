@@ -2,7 +2,6 @@
 const express = require('express');
 const path = require('path');
 const { execFile, spawn } = require('child_process');
-const fetch = require('node-fetch'); // npm install node-fetch
 
 const app = express();
 const PORT = 3000;
