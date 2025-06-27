@@ -3,25 +3,35 @@ function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 function randomMonth() {
-  let m = randomInt(1,12);
-  return m < 10 ? '0'+m : ''+m;
+  let m = Math.floor(Math.random() * 12) + 1;
+  return m < 10 ? '0' + m : '' + m;
 }
 function randomYear() {
-  return '' + randomInt(24, 30); // 2024-2030
+  return '' + (2025 + Math.floor(Math.random() * 9));
 }
 function randomCVV() {
-  return (''+randomInt(100,999));
+  return ('' + Math.floor(100 + Math.random() * 900));
 }
 function randomBalance() {
   return randomInt(100, 5000);
 }
-function luhnCheck(bin) {
-  let arr = (bin + '').split('').map(x=>+x);
-  for(let i=arr.length-2;i>=0;i-=2){
-    arr[i]*=2;if(arr[i]>9)arr[i]-=9;
+function luhnCheck(num) {
+  let arr = (num + '').split('').reverse().map(x => parseInt(x));
+  let sum = arr.reduce((acc, val, idx) => acc + (idx % 2 ? ((val *= 2) > 9 ? val - 9 : val) : val), 0);
+  return sum % 10 === 0;
+}
+function luhnGenerate(bin) {
+  let number = bin;
+  while (number.length < 15) number += Math.floor(Math.random() * 10);
+  let sum = 0;
+  for (let i = 0; i < 15; i++) {
+    let digit = parseInt(number[i]);
+    if (i % 2 === 0) digit *= 2;
+    if (digit > 9) digit -= 9;
+    sum += digit;
   }
-  let sum = arr.reduce((a,b)=>a+b,0);
-  return (10 - (sum%10))%10;
+  let checkDigit = (10 - (sum % 10)) % 10;
+  return number + checkDigit;
 }
 function getCardType(bin) {
   if (/^4/.test(bin)) return 'Visa';
@@ -60,17 +70,23 @@ function getCardLength(bin) {
   if (/^5019/.test(bin)) return 16; // Dankort
   return 16;
 }
+function allDigitsEqual(str) {
+  return /^([0-9])\1+$/.test(str);
+}
 function generateBINs(opts) {
   let bins = [];
+  let generadas = new Set();
+  let intentos = 0;
   for(let i=0;i<opts.cantidad;i++){
-    let len = getCardLength(opts.bin);
-    let base = opts.bin;
-    while(base.length < len-1) {
-      base += randomInt(0,9);
-    }
-    let card = base + luhnCheck(base);
+    let card = '';
+    do {
+      card = luhnGenerate(opts.bin);
+      intentos++;
+      if(intentos > 1000) break;
+    } while (generadas.has(card) || allDigitsEqual(card));
+    generadas.add(card);
     let mes = opts.mes || randomMonth();
-    let anio = opts.anio || randomYear();
+    let anio = opts.anio || randomYear().slice(-2);
     let cvv = opts.cvv || randomCVV();
     let divisa = opts.divisa;
     let balance = opts.balance || randomBalance();
@@ -98,8 +114,8 @@ document.getElementById('binForm').addEventListener('submit', function(e){
     divisa: document.getElementById('divisa').value,
     balance: document.getElementById('balance').value.trim()
   };
-  if(!opts.bin.match(/^\d{6,16}$/)){
-    alert('El BIN debe tener entre 6 y 16 dígitos.');
+  if(!opts.bin.match(/^\d{1,16}$/)){
+    alert('El BIN debe tener entre 1 y 16 dígitos.');
     return;
   }
   const bins = generateBINs(opts);

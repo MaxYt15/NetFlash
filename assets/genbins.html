@@ -159,6 +159,28 @@
     </div>
     <div class="row justify-content-center">
       <div class="col-lg-8">
+        <div class="card p-4 shadow mb-4">
+          <h2 class="fw-bold mb-3 text-center">
+            <i class="fa-solid fa-shield-halved me-2"></i>Validador de números de tarjeta
+          </h2>
+          <p class="text-secondary text-center mb-3" style="font-size:1.05rem;">
+            Ingresa un número de tarjeta de crédito o débito para comprobar si es válido según el algoritmo de Luhn. Útil para pruebas, desarrollo y verificación de tarjetas generadas. No comprueba si la tarjeta está activa, solo si es estructuralmente válida.
+          </p>
+          <form id="cc-validator-form" autocomplete="off">
+            <div class="mb-3">
+              <label for="cc-validate" class="form-label">Número de tarjeta</label>
+              <input type="text" class="form-control" id="cc-validate" placeholder="Ingresa el número completo" maxlength="20" required>
+            </div>
+            <div class="text-center">
+              <button type="submit" class="btn btn-gen">Validar</button>
+            </div>
+          </form>
+          <div id="cc-validator-result" class="mt-3 text-center" style="font-size:1.1rem;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
         <div class="card p-4 shadow">
           <h2 class="fw-bold mb-3 text-center">
             <img src="/assets/imagenes/logo.png" alt="Logo" style="height:2.1rem;width:auto;object-fit:contain;margin-right:0.5rem;vertical-align:middle;">
@@ -313,6 +335,22 @@
       actualizarTabla();
     });
     actualizarTabla();
+
+    // Validador de tarjetas (Luhn)
+    document.getElementById('cc-validator-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const num = document.getElementById('cc-validate').value.replace(/\s+/g, '');
+      const result = document.getElementById('cc-validator-result');
+      if (!num.match(/^\d{12,20}$/)) {
+        result.innerHTML = '<span class="text-danger">Por favor ingresa un número válido (12-20 dígitos).</span>';
+        return;
+      }
+      if (luhnCheck(num)) {
+        result.innerHTML = `<span class='text-success fw-bold'><i class='fa-solid fa-circle-check me-1'></i>Válido</span><br><span class='text-secondary'>${num.replace(/(\d{4})(?=\d)/g, '$1 ')}</span>`;
+      } else {
+        result.innerHTML = `<span class='text-danger fw-bold'><i class='fa-solid fa-circle-xmark me-1'></i>Inválido</span><br><span class='text-secondary'>${num.replace(/(\d{4})(?=\d)/g, '$1 ')}</span>`;
+      }
+    });
   </script>
 </body>
 </html> 
