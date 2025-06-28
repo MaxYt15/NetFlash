@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scrapping HTML | Flashing-bins</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/assets/imagenes/logo.png">
+</head>
+<body>
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card p-4 shadow mb-4">
+          <h2 class="fw-bold mb-3 text-center">
+            <i class="fa-solid fa-code me-2"></i>Scrapping HTML
+          </h2>
+          <p class="text-center mb-3" style="font-size:1.08rem; color:#bfc9d1; max-width:600px; margin:0 auto;">
+            Ingresa la URL de cualquier página web y obtén su código fuente HTML (index.html) para análisis, scraping o aprendizaje. Puedes copiar o descargar el HTML fácilmente.
+          </p>
+          <form id="scrapForm" autocomplete="off">
+            <div class="row g-3 align-items-end">
+              <div class="col-md-10">
+                <input type="text" class="form-control" id="url" placeholder="Ej: https://ejemplo.com" required>
+              </div>
+              <div class="col-md-2 text-end">
+                <button type="submit" class="btn btn-gen px-4"><i class="fa-solid fa-arrow-right"></i> IR</button>
+              </div>
+            </div>
+          </form>
+          <div class="mt-4" id="resultBox" style="display:none;">
+            <div class="d-flex justify-content-end mb-2">
+              <button id="copyBtn" class="btn btn-outline-info btn-sm me-2"><i class="fa-solid fa-copy"></i> Copiar HTML</button>
+              <button id="downloadBtn" class="btn btn-outline-success btn-sm"><i class="fa-solid fa-download"></i> Descargar HTML</button>
+            </div>
+            <pre id="htmlBox" class="bg-dark text-success p-3 rounded" style="font-size:0.98em; max-height:500px; overflow:auto;"></pre>
+          </div>
+          <div class="mt-4" id="zipBox" style="display:none;">
+            <div class="d-flex justify-content-center mb-2">
+              <button id="downloadZipBtn" class="btn btn-gen px-4 py-2"><i class="fa-solid fa-file-zipper me-2"></i>Descargar ZIP (HTML, CSS, JS)</button>
+            </div>
+            <div id="zipStatus" class="text-center text-info small"></div>
+          </div>
+          <div class="mt-3 text-center">
+            <a href="/" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Volver al inicio</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/assets/scrappingHtml.js"></script>
+</body>
+</html> 

@@ -7,6 +7,9 @@ const dns = require('dns').promises;
 const net = require('net');
 const tls = require('tls');
 const whois = require('whois-json');
+const JSZip = require('jszip');
+const cheerio = require('cheerio');
+const fetch2 = require('node-fetch');
 
 const app = express();
 const PORT = 3000;
@@ -37,6 +40,11 @@ app.get('/datosfake', (req, res) => {
 // Ruta para herramientas de red
 app.get('/dominiosred', (req, res) => {
   res.sendFile(path.join(__dirname, 'assets', 'DominiosRed.html'));
+});
+
+// Nueva ruta para la herramienta de scrapping HTML
+app.get('/scrappinghtml', (req, res) => {
+  res.sendFile(path.join(__dirname, 'assets', 'scrappingHtml.html'));
 });
 
 // Endpoint para test de velocidad usando el binario oficial de Speedtest CLI
@@ -250,6 +258,66 @@ app.get('/api/redtools', async (req, res) => {
     ipwhois: result.identidad.ip ? `https://ipwho.is/${result.identidad.ip}` : ''
   };
   res.json(result);
+});
+
+// Endpoint para obtener el HTML de una página
+app.get('/api/scrappinghtml', async (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).json({ error: 'Falta el parámetro url' });
+  try {
+    const response = await fetch(url, { method: 'GET', headers: { 'User-Agent': 'Mozilla/5.0' } });
+    const html = await response.text();
+    res.json({ html });
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo obtener el HTML: ' + e.message });
+  }
+});
+
+app.get('/api/scrappingzip', async (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).json({ error: 'Falta el parámetro url' });
+  try {
+    const baseUrl = url.endsWith('/') ? url : url + '/';
+    const mainRes = await fetch2(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    const html = await mainRes.text();
+    const $ = cheerio.load(html);
+    const zip = new JSZip();
+    zip.file('index.html', html);
+    // CSS
+    const cssLinks = [];
+    $('link[rel="stylesheet"]').each((i, el) => {
+      let href = $(el).attr('href');
+      if (href && !href.startsWith('data:')) cssLinks.push(href);
+    });
+    // JS
+    const jsLinks = [];
+    $('script[src]').each((i, el) => {
+      let src = $(el).attr('src');
+      if (src && !src.startsWith('data:')) jsLinks.push(src);
+    });
+    // Favicon
+    let favicon = $('link[rel="icon"]').attr('href') || '/favicon.ico';
+    // Descargar y agregar archivos
+    async function fetchAndAdd(fileUrl, name) {
+      try {
+        let fullUrl = fileUrl.startsWith('http') ? fileUrl : (fileUrl.startsWith('/') ? (new URL(fileUrl, url)).href : baseUrl + fileUrl);
+        const r = await fetch2(fullUrl);
+        if (!r.ok) return;
+        const buf = await r.buffer();
+        zip.file(name, buf);
+      } catch {}
+    }
+    await Promise.all(cssLinks.map((href, i) => fetchAndAdd(href, `css/style${i+1}.css`)));
+    await Promise.all(jsLinks.map((src, i) => fetchAndAdd(src, `js/script${i+1}.js`)));
+    if (favicon) await fetchAndAdd(favicon, 'favicon.ico');
+    // Generar ZIP
+    const zipBuf = await zip.generateAsync({ type: 'nodebuffer' });
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', 'attachment; filename="scrapping.zip"');
+    res.send(zipBuf);
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo crear el ZIP: ' + e.message });
+  }
 });
 
 // Iniciar servidor
