@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Herramientas de Red PRO | Flashing-bins</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/assets/imagenes/logo.png">
+</head>
+<body>
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card p-4 shadow mb-4">
+          <h2 class="fw-bold mb-3 text-center">
+            <i class="fa-solid fa-network-wired me-2"></i>Herramientas de Red PRO
+          </h2>
+          <p class="text-center mb-3" style="font-size:1.08rem; color:#bfc9d1; max-width:600px; margin:0 auto;">
+            Ingresa un dominio, URL o IP y obtén toda la información de red: IP, DNS, WHOIS, geolocalización, ping, puertos, cabeceras, SSL, reverse DNS y más. ¡Diagnóstico profesional en segundos!
+          </p>
+          <form id="redForm" autocomplete="off">
+            <div class="row g-3 align-items-end">
+              <div class="col-md-12">
+                <label class="form-label">Dominio, URL o IP</label>
+                <input type="text" class="form-control" id="host" placeholder="Ej: google.com, 8.8.8.8 o https://ejemplo.com" required>
+              </div>
+            </div>
+            <div class="text-center mt-4">
+              <button type="submit" class="btn btn-gen px-4"><i class="fa-solid fa-bolt me-2"></i>Analizar</button>
+              <button type="button" class="btn btn-secondary px-4 ms-2" id="resetBtn">Reiniciar</button>
+              <button type="button" class="btn btn-outline-info px-4 ms-2" id="exportBtn"><i class="fa-solid fa-download me-2"></i>Exportar JSON</button>
+            </div>
+          </form>
+          <div class="result-box mt-4" id="resultBox" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <script src="/assets/DominiosRed.js"></script>
+</body>
+</html> 

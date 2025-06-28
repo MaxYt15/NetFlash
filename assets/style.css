@@ -194,4 +194,20 @@ main, .navbar, footer {
 
 .dropdown-menu {
   z-index: 2000 !important;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  width: 100%;
+}
+.table-sm th, .table-sm td {
+  word-break: break-all;
+  white-space: pre-line;
+  max-width: 320px;
+}
+@media (max-width: 600px) {
+  .table-sm th, .table-sm td {
+    max-width: 120px;
+    font-size: 0.95em;
+  }
 } 

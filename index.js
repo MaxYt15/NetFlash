@@ -2,6 +2,11 @@
 const express = require('express');
 const path = require('path');
 const { execFile, spawn } = require('child_process');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const dns = require('dns').promises;
+const net = require('net');
+const tls = require('tls');
+const whois = require('whois-json');
 
 const app = express();
 const PORT = 3000;
@@ -22,6 +27,16 @@ app.get('/genbins', (req, res) => {
 // Ruta camuflada para correos temporales
 app.get('/correotemp', (req, res) => {
   res.sendFile(path.join(__dirname, 'assets', 'correotemp.html'));
+});
+
+// Ruta para datos falsos
+app.get('/datosfake', (req, res) => {
+  res.sendFile(path.join(__dirname, 'assets', 'datosfake.html'));
+});
+
+// Ruta para herramientas de red
+app.get('/dominiosred', (req, res) => {
+  res.sendFile(path.join(__dirname, 'assets', 'DominiosRed.html'));
 });
 
 // Endpoint para test de velocidad usando el binario oficial de Speedtest CLI
@@ -122,6 +137,119 @@ app.get('/api/1secmail', async (req, res) => {
     console.error('Error al consultar 1secmail:', e);
     res.status(500).json({ error: 'Error al consultar 1secmail' });
   }
+});
+
+app.get('/api/redtools', async (req, res) => {
+  const { host } = req.query;
+  if (!host) return res.status(400).json({ error: 'Falta el parámetro host' });
+  let dominio = host.replace(/^https?:\/\//, '').replace(/\/$/, '').split('/')[0];
+  let result = { identidad: {}, dns: {}, whois: {}, geo: {}, ping: {}, puertos: {}, cabeceras: {}, ssl: {}, proteccion: {}, enlaces: {} };
+  // 1. IP y reverse DNS
+  try {
+    const ips = await dns.resolve4(dominio);
+    result.identidad.ip = ips[0];
+    const ptr = await dns.reverse(ips[0]);
+    result.identidad.reverse = ptr;
+  } catch (e) {
+    result.identidad.ip = null;
+    result.identidad.reverse = null;
+  }
+  result.identidad.dominio = dominio;
+  // 2. DNS
+  try {
+    result.dns.A = await dns.resolve4(dominio).catch(()=>[]);
+    result.dns.AAAA = await dns.resolve6(dominio).catch(()=>[]);
+    result.dns.MX = await dns.resolveMx(dominio).catch(()=>[]);
+    result.dns.TXT = await dns.resolveTxt(dominio).catch(()=>[]);
+    result.dns.CNAME = await dns.resolveCname(dominio).catch(()=>[]);
+    result.dns.PTR = result.identidad.ip ? await dns.reverse(result.identidad.ip).catch(()=>[]) : [];
+    result.dns.DNSSEC = [];
+  } catch (e) {}
+  // 3. WHOIS
+  try {
+    result.whois = await whois(dominio);
+  } catch (e) { result.whois = { error: 'No disponible' }; }
+  // 4. Geolocalización
+  try {
+    const ip = result.identidad.ip;
+    if (ip) {
+      const [geo1, geo2, geo3] = await Promise.all([
+        fetch(`http://ip-api.com/json/${ip}`).then(r=>r.json()).catch(()=>null),
+        fetch(`https://ipwho.is/${ip}`).then(r=>r.json()).catch(()=>null),
+        fetch(`https://ipinfo.io/${ip}/json`).then(r=>r.json()).catch(()=>null)
+      ]);
+      result.geo = { 'ip-api': geo1, 'ipwhois': geo2, 'ipinfo': geo3 };
+    }
+  } catch (e) { result.geo = {}; }
+  // 5. Ping
+  try {
+    const start = Date.now();
+    const socket = net.createConnection(80, dominio);
+    await new Promise((resolve, reject) => {
+      socket.on('connect', () => { socket.end(); resolve(); });
+      socket.on('error', reject);
+      setTimeout(()=>reject('timeout'), 3000);
+    });
+    result.ping.ms = Date.now() - start;
+  } catch (e) { result.ping.ms = null; }
+  // 6. Puertos comunes
+  const puertos = [80, 443, 8080, 21, 22, 25, 53, 110, 143, 3306, 3389];
+  result.puertos = {};
+  await Promise.all(puertos.map(p => new Promise(resolve => {
+    const s = net.createConnection(p, dominio);
+    let abierto = false;
+    s.on('connect', () => { abierto = true; s.end(); });
+    s.on('close', () => { result.puertos[p] = abierto ? 'abierto' : 'cerrado'; resolve(); });
+    s.on('error', () => { result.puertos[p] = 'cerrado'; resolve(); });
+    setTimeout(()=>{ result.puertos[p] = 'timeout'; s.destroy(); resolve(); }, 2000);
+  })));
+  // 7. Cabeceras HTTP
+  try {
+    const resp = await fetch('http://' + dominio, { method: 'HEAD' });
+    result.cabeceras = Object.fromEntries(resp.headers.entries());
+  } catch (e) { result.cabeceras = { error: 'No disponible' }; }
+  // 8. SSL
+  try {
+    await new Promise((resolve, reject) => {
+      const socket = tls.connect(443, dominio, { servername: dominio, rejectUnauthorized: false }, () => {
+        result.ssl = {
+          autorizado: socket.authorized,
+          sujeto: socket.getPeerCertificate(),
+          protocolo: socket.getProtocol(),
+          cipher: socket.getCipher()
+        };
+        socket.end();
+        resolve();
+      });
+      socket.on('error', reject);
+      setTimeout(()=>reject('timeout'), 3000);
+    });
+  } catch (e) { result.ssl = { error: 'No disponible' }; }
+  // 9. Protección DDoS
+  try {
+    const server = result.cabeceras.server ? result.cabeceras.server.toLowerCase() : '';
+    if (server.includes('cloudflare')) result.proteccion = 'Cloudflare';
+    else if (server.includes('sucuri')) result.proteccion = 'Sucuri';
+    else if (server.includes('akamai')) result.proteccion = 'Akamai';
+    else if (server.includes('incapsula')) result.proteccion = 'Incapsula';
+    else result.proteccion = 'No detectada';
+  } catch (e) { result.proteccion = 'No detectada'; }
+  // 10. Enlaces útiles
+  result.enlaces = {
+    ssl: `https://www.ssllabs.com/ssltest/analyze.html?d=${dominio}`,
+    virustotal: `https://www.virustotal.com/gui/domain/${dominio}`,
+    shodan: `https://www.shodan.io/search?query=${dominio}`,
+    mxtoolbox: `https://mxtoolbox.com/SuperTool.aspx?action=mx%3a${dominio}`,
+    viewdns: `https://viewdns.info/reverseip/?host=${dominio}&t=1`,
+    crtsh: `https://crt.sh/?q=%25.${dominio}`,
+    robots: `https://${dominio}/robots.txt`,
+    sitemap: `https://${dominio}/sitemap.xml`,
+    favicon: `https://${dominio}/favicon.ico`,
+    headers: `https://httpbin.org/headers`,
+    ipinfo: result.identidad.ip ? `https://ipinfo.io/${result.identidad.ip}` : '',
+    ipwhois: result.identidad.ip ? `https://ipwho.is/${result.identidad.ip}` : ''
+  };
+  res.json(result);
 });
 
 // Iniciar servidor
